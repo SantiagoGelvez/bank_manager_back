@@ -11,7 +11,7 @@ from .models import CustomUser
 from .serializers import UserSerializer
 
 
-class RegisterView(APIView):
+class SignUpView(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -45,7 +45,7 @@ class LoginView(APIView):
 
         response.data = {
             'message': 'success',
-            'token': token
+            'jwt': token
         }
         return response
 
