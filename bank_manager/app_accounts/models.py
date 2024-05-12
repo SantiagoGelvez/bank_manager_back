@@ -70,10 +70,10 @@ class BankAccount(models.Model):
             total=models.Sum('amount'))['total'] or 0
         return income - expense
 
-
     @staticmethod
     def create(**kwargs):
         balance = kwargs.pop('balance', 0)
+
         account_type = kwargs.pop('account_type')
         kwargs['account_type'] = AccountType.objects.get(code=account_type)
 

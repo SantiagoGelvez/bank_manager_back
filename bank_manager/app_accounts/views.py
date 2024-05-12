@@ -97,6 +97,9 @@ def register_bank_account(request):
     data = request.data.dict()
     data['user'] = user
 
+    if data.balance < 0:
+        return Response({'message': 'Invalid amount'}, status=status.HTTP_400_BAD_REQUEST)
+
     bank_account = BankAccount.create(**data)
 
     return Response(BankAccountSerializer(bank_account).data, status=status.HTTP_201_CREATED)
@@ -121,6 +124,9 @@ def deposit_to_account(request, uuid):
         return Response({'message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
 
     amount = request.data.get('amount')
+    if amount <= 0:
+        return Response({'message': 'Invalid amount'}, status=status.HTTP_400_BAD_REQUEST)
+
     bank_account.deposit(amount)
 
     return Response(BankAccountSerializer(bank_account).data)
@@ -132,7 +138,16 @@ def withdraw_from_account(request, uuid):
     user = get_user_from_jwt_token(token)
 
     bank_account = BankAccount.objects.get(uuid=uuid)
+
+    if bank_account.user != user:
+        return Response({'message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
     amount = request.data.get('amount')
+    if amount <= 0:
+        return Response({'message': 'Invalid amount'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if amount > bank_account.total_balance:
+        return Response({'message': 'Insufficient balance'}, status=status.HTTP_400_BAD_REQUEST)
 
     bank_account.withdraw(amount)
 
