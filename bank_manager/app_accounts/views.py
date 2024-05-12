@@ -70,6 +70,22 @@ class UserView(APIView):
 
         return response
 
+    def put(self, request):
+        token = request.COOKIES.get('jwt')
+        user = get_user_from_jwt_token(token)
+        serializer = UserSerializer(user, data=request.data, partial=True)
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        response = Response()
+        response.data = {
+            'user': serializer.data,
+            'jwt': token
+        }
+
+        return response
+
 
 class LogoutView(APIView):
     def post(self, request):
@@ -97,7 +113,7 @@ def register_bank_account(request):
     data = request.data.dict()
     data['user'] = user
 
-    if data.balance < 0:
+    if int(data['balance']) < 0:
         return Response({'message': 'Invalid amount'}, status=status.HTTP_400_BAD_REQUEST)
 
     bank_account = BankAccount.create(**data)
@@ -124,7 +140,7 @@ def deposit_to_account(request, uuid):
         return Response({'message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
 
     amount = request.data.get('amount')
-    if amount <= 0:
+    if int(amount) <= 0:
         return Response({'message': 'Invalid amount'}, status=status.HTTP_400_BAD_REQUEST)
 
     bank_account.deposit(amount)
@@ -143,10 +159,10 @@ def withdraw_from_account(request, uuid):
         return Response({'message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
 
     amount = request.data.get('amount')
-    if amount <= 0:
+    if int(amount) <= 0:
         return Response({'message': 'Invalid amount'}, status=status.HTTP_400_BAD_REQUEST)
 
-    if amount > bank_account.total_balance:
+    if int(amount) > bank_account.total_balance:
         return Response({'message': 'Insufficient balance'}, status=status.HTTP_400_BAD_REQUEST)
 
     bank_account.withdraw(amount)
