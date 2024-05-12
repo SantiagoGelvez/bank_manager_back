@@ -6,10 +6,14 @@ from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.decorators import api_view
 
-from .models import CustomUser
-from .serializers import UserSerializer
+from .models import CustomUser, AccountType, BankAccount
+from .serializers import UserSerializer, BankAccountSerializer, AccountTypeSerializer
+from .modules.common import get_user_from_jwt_token
 
+
+# Authentication views
 
 class SignUpView(APIView):
     def post(self, request):
@@ -55,19 +59,16 @@ class LoginView(APIView):
 class UserView(APIView):
     def get(self, request):
         token = request.COOKIES.get('jwt')
-
-        if not token:
-            raise AuthenticationFailed('Unauthenticated')
-
-        try:
-            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Unauthenticated')
-
-        user = CustomUser.objects.get(uuid=payload['uuid'])
+        user = get_user_from_jwt_token(token)
         serializer = UserSerializer(user)
 
-        return Response(serializer.data)
+        response = Response()
+        response.data = {
+            'user': serializer.data,
+            'jwt': token
+        }
+
+        return response
 
 
 class LogoutView(APIView):
@@ -78,3 +79,61 @@ class LogoutView(APIView):
             'message': 'success'
         }
         return response
+
+
+# Bank account views
+
+@api_view(['GET'])
+def get_account_types(request):
+    account_type = AccountType.objects.all()
+    return Response(AccountTypeSerializer(account_type, many=True).data)
+
+
+@api_view(['POST'])
+def register_bank_account(request):
+    token = request.COOKIES.get('jwt')
+    user = get_user_from_jwt_token(token)
+
+    data = request.data.dict()
+    data['user'] = user
+
+    bank_account = BankAccount.create(**data)
+
+    return Response(BankAccountSerializer(bank_account).data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET'])
+def get_bank_account_list(request):
+    token = request.COOKIES.get('jwt')
+    user = get_user_from_jwt_token(token)
+    bank_accounts = user.bankaccount_set.all()
+    return Response(BankAccountSerializer(bank_accounts, many=True).data)
+
+
+@api_view(['POST'])
+def deposit_to_account(request, uuid):
+    token = request.COOKIES.get('jwt')
+    user = get_user_from_jwt_token(token)
+
+    bank_account = BankAccount.objects.get(uuid=uuid)
+
+    if bank_account.user != user:
+        return Response({'message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    amount = request.data.get('amount')
+    bank_account.deposit(amount)
+
+    return Response(BankAccountSerializer(bank_account).data)
+
+
+@api_view(['POST'])
+def withdraw_from_account(request, uuid):
+    token = request.COOKIES.get('jwt')
+    user = get_user_from_jwt_token(token)
+
+    bank_account = BankAccount.objects.get(uuid=uuid)
+    amount = request.data.get('amount')
+
+    bank_account.withdraw(amount)
+
+    return Response(BankAccountSerializer(bank_account).data)

@@ -1,0 +1,38 @@
+[
+  {
+    "model": "app_accounts.TransactionType",
+    "pk": 1,
+    "fields": {
+      "name": "Deposit",
+      "code": "DEP",
+      "description": "Make a deposit to your account"
+    }
+  },
+  {
+    "model": "app_accounts.TransactionType",
+    "pk": 2,
+    "fields": {
+      "name": "Withdrawal",
+      "code": "WTH",
+      "description": "Withdraw money from your account"
+    }
+  },
+  {
+    "model": "app_accounts.TransactionType",
+    "pk": 3,
+    "fields": {
+      "name": "Transfer",
+      "code": "TRF",
+      "description": "Transfer money to another account"
+    }
+  },
+  {
+    "model": "app_accounts.TransactionType",
+    "pk": 4,
+    "fields": {
+      "name": "Initial Deposit",
+      "code": "IDP",
+      "description": "Initial deposit to open an account"
+    }
+  }
+]

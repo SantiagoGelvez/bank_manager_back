@@ -1,0 +1,34 @@
+[
+  {
+    "model": "app_accounts.TransactionStatus",
+    "pk": 1,
+    "fields": {
+      "code": "P",
+      "name": "Processing"
+    }
+  },
+  {
+    "model": "app_accounts.TransactionStatus",
+    "pk": 2,
+    "fields": {
+      "code": "S",
+      "name": "Successful"
+    }
+  },
+  {
+    "model": "app_accounts.TransactionStatus",
+    "pk": 3,
+    "fields": {
+        "code": "F",
+        "name": "Failed"
+    }
+  },
+  {
+    "model": "app_accounts.TransactionStatus",
+    "pk": 4,
+    "fields": {
+      "code": "C",
+      "name": "Cancelled"
+    }
+  }
+]

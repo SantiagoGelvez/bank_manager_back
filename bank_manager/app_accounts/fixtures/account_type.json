@@ -1,0 +1,11 @@
+[
+  {
+    "model": "app_accounts.AccountType",
+    "pk": 1,
+    "fields": {
+      "name": "Checking Account",
+      "code": "CHE",
+      "description": "A Checking Account is a type of account that allows you to deposit and withdraw money as needed."
+    }
+  }
+]

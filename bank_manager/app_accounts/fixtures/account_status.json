@@ -1,0 +1,26 @@
+[
+  {
+    "model": "app_accounts.AccountStatus",
+    "pk": 1,
+    "fields": {
+      "code": "A",
+      "name": "Active"
+    }
+  },
+  {
+    "model": "app_accounts.AccountStatus",
+    "pk": 2,
+    "fields": {
+      "code": "I",
+      "name": "Inactive"
+    }
+  },
+  {
+    "model": "app_accounts.AccountStatus",
+    "pk": 3,
+    "fields": {
+      "code": "C",
+      "name": "Closed"
+    }
+  }
+]
