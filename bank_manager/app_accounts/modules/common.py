@@ -4,6 +4,11 @@ from ..models import CustomUser
 
 
 def get_user_from_jwt_token(token):
+    """
+    Get user from JWT token
+    :param token:
+    :return: CustomUser
+    """
     if not token:
         raise AuthenticationFailed('Unauthenticated')
 

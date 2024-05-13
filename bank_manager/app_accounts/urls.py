@@ -15,6 +15,10 @@ urlpatterns = [
     path('accounts/types', views.get_account_types),
     path('accounts/register', views.register_bank_account),
     path('accounts', views.get_bank_account_list),
+    path('accounts/<uuid:uuid>', views.get_bank_account),
     path('accounts/<uuid:uuid>/deposit', views.deposit_to_account),
     path('accounts/<uuid:uuid>/withdraw', views.withdraw_from_account),
+
+    # Transaction URLs
+    path('transactions/<uuid:uuid>', views.TransactionView.as_view()),
 ]

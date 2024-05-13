@@ -8,8 +8,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 
-from .models import CustomUser, AccountType, BankAccount
-from .serializers import UserSerializer, BankAccountSerializer, AccountTypeSerializer
+from .models import CustomUser, AccountType, BankAccount, Transaction
+from .serializers import UserSerializer, BankAccountSerializer, AccountTypeSerializer, TransactionSerializer
 from .modules.common import get_user_from_jwt_token
 
 
@@ -101,12 +101,22 @@ class LogoutView(APIView):
 
 @api_view(['GET'])
 def get_account_types(request):
+    """
+    Get all account types
+    :param request:
+    :return: AccountTypeSerializer
+    """
     account_type = AccountType.objects.all()
     return Response(AccountTypeSerializer(account_type, many=True).data)
 
 
 @api_view(['POST'])
 def register_bank_account(request):
+    """
+    Register a bank account
+    :param request:
+    :return: BankAccountSerializer
+    """
     token = request.COOKIES.get('jwt')
     user = get_user_from_jwt_token(token)
 
@@ -123,14 +133,44 @@ def register_bank_account(request):
 
 @api_view(['GET'])
 def get_bank_account_list(request):
+    """
+    Get all bank accounts
+    :param request:
+    :return: List of BankAccountSerializer
+    """
     token = request.COOKIES.get('jwt')
     user = get_user_from_jwt_token(token)
     bank_accounts = user.bankaccount_set.all()
     return Response(BankAccountSerializer(bank_accounts, many=True).data)
 
 
+@api_view(['GET'])
+def get_bank_account(request, uuid):
+    """
+    Get details of a bank account
+    :param request:
+    :param uuid:
+    :return: BankAccountSerializer
+    """
+    token = request.COOKIES.get('jwt')
+    user = get_user_from_jwt_token(token)
+
+    bank_account = BankAccount.objects.get(uuid=uuid)
+
+    if bank_account.user != user:
+        return Response({'message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    return Response(BankAccountSerializer(bank_account).data)
+
+
 @api_view(['POST'])
 def deposit_to_account(request, uuid):
+    """
+    Deposit to a bank account
+    :param request:
+    :param uuid:
+    :return: BankAccountSerializer
+    """
     token = request.COOKIES.get('jwt')
     user = get_user_from_jwt_token(token)
 
@@ -150,6 +190,12 @@ def deposit_to_account(request, uuid):
 
 @api_view(['POST'])
 def withdraw_from_account(request, uuid):
+    """
+    Withdraw from a bank account
+    :param request:
+    :param uuid:
+    :return: BankAccountSerializer
+    """
     token = request.COOKIES.get('jwt')
     user = get_user_from_jwt_token(token)
 
@@ -168,3 +214,25 @@ def withdraw_from_account(request, uuid):
     bank_account.withdraw(amount)
 
     return Response(BankAccountSerializer(bank_account).data)
+
+
+# Transaction views
+
+class TransactionView(APIView):
+    def get(self, request, uuid):
+        """
+        Get all transactions of a bank account
+        :param request:
+        :param uuid:
+        :return: List of TransactionSerializer
+        """
+        token = request.COOKIES.get('jwt')
+        user = get_user_from_jwt_token(token)
+
+        bank_account = BankAccount.objects.get(uuid=uuid)
+
+        if bank_account.user != user:
+            return Response({'message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        transactions = Transaction.objects.filter(bank_account=bank_account).order_by('-created_at')
+        return Response(TransactionSerializer(transactions, many=True).data)

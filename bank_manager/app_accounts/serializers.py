@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import CustomUser, BankAccount, AccountType, BankAccountStatusLog, AccountStatus
+from .models import CustomUser, BankAccount, AccountType, BankAccountStatusLog, AccountStatus, TransactionType, \
+    Transaction, TransactionStatus
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -50,3 +51,26 @@ class BankAccountStatusLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = BankAccountStatusLog
         fields = ['uuid', 'bank_account', 'status', 'created_at', 'notes']
+
+
+class TransactionTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TransactionType
+        fields = ['code', 'name', 'description']
+
+
+class TransactionStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TransactionStatus
+        fields = ['code', 'name']
+
+
+class TransactionSerializer(serializers.ModelSerializer):
+    uuid = serializers.UUIDField(format='hex_verbose', read_only=True, required=False)
+    bank_account = BankAccountSerializer(read_only=True)
+    transaction_type = TransactionTypeSerializer(read_only=True)
+    transaction_status = TransactionStatusSerializer(read_only=True)
+
+    class Meta:
+        model = Transaction
+        fields = ['uuid', 'bank_account', 'transaction_type', 'transaction_status', 'amount', 'created_at']
