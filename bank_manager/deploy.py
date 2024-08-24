@@ -16,21 +16,22 @@ def main():
         # Actualizar el repositorio
         run_command("git pull origin main")
 
-        # Activar el entorno virtual
-        run_command("source ../venv/bin/activate", check=False)
+        # Definir el directorio del entorno virtual y el directorio del proyecto
+        venv_bin = '/home/ubuntu/back/bank_manager_back/venv/bin'
+        manage_py = '/home/ubuntu/back/bank_manager_back/bank_manager'
 
-        # Instalar dependencias
-        run_command("pip install -r requirements.txt")
+        # Activar el entorno virtual y ejecutar comandos dentro de él
+        pip_install = f"{venv_bin}/pip install -r {manage_py}/requirements.txt"
+        run_command(pip_install)
 
-        # Aplicar migraciones
-        run_command("python3 manage.py makemigrations")
-        run_command("python3 manage.py migrate")
+        makemigrations = f"{venv_bin}/python {manage_py}/manage.py makemigrations"
+        migrate = f"{venv_bin}/python {manage_py}/manage.py migrate"
+        collectstatic = f"{venv_bin}/python {manage_py}/manage.py collectstatic --noinput"
 
-        # Cargar datos en fixtures
-        run_command("python3 manage.py loaddata */fixtures/*")
-
-        # Recolectar archivos estáticos
-        run_command("python3 manage.py collectstatic --noinput")
+        # Aplicar migraciones y recolectar archivos estáticos
+        run_command(makemigrations)
+        run_command(migrate)
+        run_command(collectstatic)
 
         # Reiniciar Gunicorn
         run_command("sudo systemctl restart gunicorn_bank")
