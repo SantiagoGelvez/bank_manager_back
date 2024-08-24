@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 
 from decouple import config
+import sentry_sdk
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -140,3 +141,12 @@ AUTH_USER_MODEL = 'app_accounts.CustomUser'
 # CORS
 CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', cast=lambda v: [s.strip() for s in v.split(',')])
 CORS_ALLOW_CREDENTIALS = True
+
+# Sentry
+if config('DEBUG', default=False, cast=bool) is False:
+    sentry_sdk.init(
+        dsn=config('SENTRY_DSN'),
+        traces_sample_rate=1.0,
+        profiles_sample_rate=1.0,
+        send_default_pii=True
+    )
